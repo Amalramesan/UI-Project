@@ -1,31 +1,6 @@
-//create a class for managing database
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
-class Transaction {
-  final int? id;
-  final String type;
-  final String money;
-  final String remark;
-  Transaction({
-    this.id,
-    required this.money,
-    required this.remark,
-    required this.type,
-  });
-  Map<String, dynamic> toMap() {
-    return {'id': id, 'money': money, 'remark': remark, 'type': type};
-  }
-
-  factory Transaction.fromMap(Map<String, dynamic> map) {
-    return Transaction(
-      id: map['id'],
-      money: map['money'],
-      remark: map['remark'],
-      type: map['type'],
-    );
-  }
-}
+import 'package:work_ui/models/transaction.dart';
 
 class DatabaseService {
   static Database? _db;
@@ -61,16 +36,16 @@ class DatabaseService {
     );
   }
 
-  Future<void> addTransaction(Transaction txn) async {
+  Future<void> addTransaction(Transactions txn) async {
     final db = await database;
     await db.insert(_tableName, txn.toMap());
     print("Transaction saved: ${txn.toMap()}");
   }
 
-  Future<List<Transaction>> getalltransaction() async {
+  Future<List<Transactions>> getalltransaction() async {
     final db = await database;
     final List<Map<String, dynamic>> result = await db.query(_tableName);
-    return result.map((map) => Transaction.fromMap(map)).toList();
+    return result.map((map) => Transactions.fromMap(map)).toList();
   }
 
   Future<void> deleteTransaction(int id) async {
@@ -78,7 +53,7 @@ class DatabaseService {
     await db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<void> updateTransaction(Transaction txn) async {
+  Future<void> updateTransaction(Transactions txn) async {
     final db = await database;
     await db.update(
       _tableName,
