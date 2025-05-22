@@ -5,18 +5,13 @@ import 'package:work_ui/untils/validator.dart';
 import 'package:work_ui/widgets/login_button.dart';
 import 'package:work_ui/widgets/text_field.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginPage extends StatelessWidget {
+  LoginPage({super.key});
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _hideText = true;
+  final ValueNotifier<bool> _hideText = ValueNotifier(true);
 
   Future<void> _saveLogin(String email, String password) async {
     final prefs = await SharedPreferences.getInstance();
@@ -24,11 +19,7 @@ class _LoginPageState extends State<LoginPage> {
     await prefs.setString('password', password);
   }
 
-  void _togglePassword() {
-    setState(() => _hideText = !_hideText);
-  }
-
-  void _handleLogin() async {
+  void _handleLogin(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
@@ -68,21 +59,26 @@ class _LoginPageState extends State<LoginPage> {
                 "Password",
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
-              CustomTextField(
-                controller: _passwordController,
-                hintText: "Enter your Password",
-                icon: Icons.password,
-                isObscure: _hideText,
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _hideText ? Icons.visibility_off : Icons.visibility,
-                  ),
-                  onPressed: _togglePassword,
-                ),
-                validator: passwordValidator,
+              ValueListenableBuilder<bool>(
+                valueListenable: _hideText,
+                builder: (context, hide, _) {
+                  return CustomTextField(
+                    controller: _passwordController,
+                    hintText: "Enter your Password",
+                    icon: Icons.password,
+                    isObscure: hide,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        hide ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () => _hideText.value = !hide,
+                    ),
+                    validator: passwordValidator,
+                  );
+                },
               ),
               const SizedBox(height: 24),
-              LoginButton(onPressed: _handleLogin),
+              LoginButton(onPressed: () => _handleLogin(context)),
             ],
           ),
         ),
