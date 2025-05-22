@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:work_ui/services/database_servises.dart';
 import '../models/transaction.dart';
 
-Future<Transactions?> showAddDialog(BuildContext context) {
+Future<Transactions?> showAddDialog(BuildContext context, String email) {
   final TextEditingController moneyController = TextEditingController();
   final TextEditingController remarkController = TextEditingController();
   String transactionType = 'debit';

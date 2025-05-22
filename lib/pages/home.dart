@@ -15,11 +15,12 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  List<Transactions> transactions = [];
+  final ValueNotifier<List<Transactions>> transactions = ValueNotifier([]);
 
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+    transactions.value = [];
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => LoginPage()),
@@ -28,71 +29,77 @@ class _HomepageState extends State<Homepage> {
 
   Future<void> _loadTransactions() async {
     final data = await DatabaseService.instance.getalltransaction();
-    transactions = data; // No setState here
+    transactions.value = data;
+  }
+
+  @override
+  void dispose() {
+    transactions.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Welcome ${widget.email}'),
-        actions: [IconButton(icon: Icon(Icons.logout), onPressed: _logout)],
-      ),
-      body: FutureBuilder(
-        future: _loadTransactions(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
+    return FutureBuilder(
+      future: _loadTransactions(), // Load transactions once
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-          return DefaultTabController(
-            length: 2,
-            child: Column(
-              children: [
-                TabBar(
-                  tabs: [
-                    Tab(text: 'Debit'),
-                    Tab(text: 'Credit'),
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Welcome ${widget.email}'),
+            actions: [IconButton(icon: Icon(Icons.logout), onPressed: _logout)],
+          ),
+          body: ValueListenableBuilder<List<Transactions>>(
+            valueListenable: transactions,
+            builder: (context, txnList, _) {
+              return DefaultTabController(
+                length: 2,
+                child: Column(
+                  children: [
+                    const TabBar(
+                      tabs: [
+                        Tab(text: 'Debit'),
+                        Tab(text: 'Credit'),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          TransactionList(
+                            type: 'debit',
+                            transactions: txnList,
+                            refresh: _loadTransactions,
+                          ),
+                          TransactionList(
+                            type: 'credit',
+                            transactions: txnList,
+                            refresh: _loadTransactions,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      TransactionList(
-                        type: 'debit',
-                        transactions: transactions,
-                        refresh: () async {
-                          await _loadTransactions();
-                          setState(() {}); // Refresh list manually
-                        },
-                      ),
-                      TransactionList(
-                        type: 'credit',
-                        transactions: transactions,
-                        refresh: () async {
-                          await _loadTransactions();
-                          setState(() {}); // Refresh list manually
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final txn = await showAddDialog(context);
-          if (txn != null) {
-            await DatabaseService.instance.addTransaction(txn);
-            await _loadTransactions();
-            setState(() {}); // Refresh list after adding
-          }
-        },
-        child: Icon(Icons.add),
-      ),
+              );
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              final txn = await showAddDialog(context, widget.email);
+              if (txn != null) {
+                await DatabaseService.instance.addTransaction(txn);
+                await _loadTransactions();
+              }
+            },
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 }
