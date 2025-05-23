@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:work_ui/controllers/controllers.dart';
 import 'package:work_ui/pages/splash.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +14,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(debugShowCheckedModeBanner: false, home: Splash());
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TransactionController()),
+      ],
+      child: MaterialApp(debugShowCheckedModeBanner: false, home: Splash()),
+    );
   }
 }
