@@ -11,38 +11,29 @@ class Homepage extends StatelessWidget {
 
   Homepage({super.key, required this.email});
 
-  Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    Provider.of<TransactionController>(
-      context,
-      listen: false,
-    ).clearTransactions();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginPage()),
-    );
-  }
+  // Future<void> _logout(BuildContext context) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.clear();
+  //   Provider.of<TransactionController>(
+  //     context,
+  //     listen: false,
+  //   ).clearTransactions();
+  //   Navigator.pushReplacement(
+  //     context,
+  //     MaterialPageRoute(builder: (_) => LoginPage()),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<TransactionController>();
-
-    // Load transactions only once after build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!controller.isLoading && controller.transactions.isEmpty) {
-        controller.loadTransactions();
-      }
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome $email'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.logout),
+          //   // onPressed: () => _logout(context),
+          // ),
         ],
       ),
       body: Consumer<TransactionController>(
@@ -84,6 +75,10 @@ class Homepage extends StatelessWidget {
         onPressed: () async {
           final txn = await showAddDialog(context, email);
           if (txn != null) {
+            final controller = Provider.of<TransactionController>(
+              context,
+              listen: false,
+            );
             await controller.addTransaction(txn);
           }
         },

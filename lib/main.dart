@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:work_ui/controllers/controllers.dart';
+import 'package:work_ui/controllers/login_controller.dart';
 import 'package:work_ui/pages/splash.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => TransactionController()),
+        ChangeNotifierProvider(create: (_) => LoginController()),
       ],
       child: MaterialApp(debugShowCheckedModeBanner: false, home: Splash()),
     );
