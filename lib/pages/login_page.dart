@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:work_ui/controllers/login_controller.dart';
-import 'package:work_ui/untils/validator.dart';
+import 'package:work_ui/services/validator.dart';
 import 'package:work_ui/widgets/login_button.dart';
 import 'package:work_ui/widgets/text_field.dart';
 
