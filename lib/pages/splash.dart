@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:work_ui/controllers/controllers.dart';
 import 'package:work_ui/pages/home.dart';
 import 'package:work_ui/pages/login_page.dart';
+import 'package:work_ui/untils/shared_prefs.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -21,16 +23,20 @@ class _SplashState extends State<Splash> {
   }
 
   Future<void> _navigate() async {
-    await Future.delayed(Duration(seconds: 2)); // simulate splash delay
+    await Future.delayed(Duration(seconds: 2));
+    final authmodel = await SharedPrefs.getLoginData();
+    final transationctrl = Provider.of<TransactionController>(
+      context,
+      listen: false,
+    );
+    await transationctrl.loadTransactions();
 
-    final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('email');
-    final password = prefs.getString('password');
-
-    if (email != null && password != null) {
+    if (authmodel != null && authmodel != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Homepage(email: email)),
+        MaterialPageRoute(
+          builder: (context) => Homepage(email: authmodel.email),
+        ),
       );
     } else {
       Navigator.pushReplacement(

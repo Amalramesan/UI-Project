@@ -4,21 +4,15 @@ import 'package:work_ui/services/database_servises.dart';
 
 class TransactionController with ChangeNotifier {
   final List<Transactions> _transactions = [];
-  bool _isLoading = false;
 
   List<Transactions> get transactions => _transactions;
-  bool get isLoading => _isLoading;
 
   Future<void> loadTransactions() async {
-    _isLoading = true;
-    notifyListeners();
-
     final data = await DatabaseService.instance.getalltransaction();
     _transactions
       ..clear()
       ..addAll(data);
 
-    _isLoading = false;
     notifyListeners();
   }
 
@@ -38,7 +32,6 @@ class TransactionController with ChangeNotifier {
   }
 
   void clearTransactions() {
-    _transactions.clear();
     notifyListeners();
   }
 }

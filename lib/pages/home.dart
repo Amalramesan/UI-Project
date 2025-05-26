@@ -1,28 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:work_ui/controllers/controllers.dart';
+import 'package:work_ui/controllers/login_controller.dart';
 import 'package:work_ui/pages/login_page.dart';
+import 'package:work_ui/untils/shared_prefs.dart';
 import 'package:work_ui/widgets/transaction_dialog.dart';
 import 'package:work_ui/widgets/transaction_list.dart';
 
 class Homepage extends StatelessWidget {
   final String email;
 
-  Homepage({super.key, required this.email});
-
-  // Future<void> _logout(BuildContext context) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.clear();
-  //   Provider.of<TransactionController>(
-  //     context,
-  //     listen: false,
-  //   ).clearTransactions();
-  //   Navigator.pushReplacement(
-  //     context,
-  //     MaterialPageRoute(builder: (_) => LoginPage()),
-  //   );
-  // }
+  const Homepage({super.key, required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -30,56 +18,60 @@ class Homepage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Welcome $email'),
         actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.logout),
-          //   // onPressed: () => _logout(context),
-          // ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await SharedPrefs.clearlogin();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
+          ),
         ],
       ),
-      body: Consumer<TransactionController>(
-        builder: (context, controller, child) {
-          return controller.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : DefaultTabController(
-                  length: 2,
-                  child: Column(
-                    children: [
-                      const TabBar(
-                        tabs: [
-                          Tab(text: 'Debit'),
-                          Tab(text: 'Credit'),
-                        ],
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          children: [
-                            TransactionList(
-                              type: 'debit',
-                              transactions: controller.transactions,
-                              refresh: controller.loadTransactions,
-                            ),
-                            TransactionList(
-                              type: 'credit',
-                              transactions: controller.transactions,
-                              refresh: controller.loadTransactions,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+      body: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            const TabBar(
+              tabs: [
+                Tab(text: 'Debit'),
+                Tab(text: 'Credit'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  Consumer<TransactionController>(
+                    builder: (context, controller, _) {
+                      return TransactionList(
+                        type: 'debit',
+                        transactions: controller.transactions,
+                        refresh: controller.loadTransactions,
+                      );
+                    },
                   ),
-                );
-        },
+                  Consumer<TransactionController>(
+                    builder: (context, controller, _) {
+                      return TransactionList(
+                        type: 'credit',
+                        transactions: controller.transactions,
+                        refresh: controller.loadTransactions,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final txn = await showAddDialog(context, email);
           if (txn != null) {
-            final controller = Provider.of<TransactionController>(
-              context,
-              listen: false,
-            );
-            await controller.addTransaction(txn);
+            context.read<TransactionController>().addTransaction(txn);
           }
         },
         child: const Icon(Icons.add),
