@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:work_ui/controllers/controllers.dart';
 import 'package:work_ui/models/auth_model.dart';
 import 'package:work_ui/pages/home.dart';
-import 'package:work_ui/untils/shared_prefs.dart';
+import 'package:work_ui/servicess/shared_prefs.dart';
 
 class LoginController with ChangeNotifier {
   final formKey = GlobalKey<FormState>();
@@ -32,7 +31,7 @@ class LoginController with ChangeNotifier {
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      await SharedPrefs.savelogin(auth.email, auth.password);
+      await SharedPrefs.savelogin(auth);
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

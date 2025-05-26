@@ -5,12 +5,12 @@ class SharedPrefs {
   static const _keyemail = 'email';
   static const _keypassword = 'password';
 
-  static Future<AuthModel?> savelogin(String email, String password) async {
+  static Future<AuthModel?> savelogin(AuthModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyemail, email.trim());
-    await prefs.setString(_keypassword, password.trim());
+    await prefs.setString(_keyemail, user.email.trim());
+    await prefs.setString(_keypassword, user.password.trim());
 
-    return AuthModel(email: email.trim(), password: password.trim());
+    return user;
   }
 
   static Future<AuthModel?> getLoginData() async {
